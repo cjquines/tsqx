@@ -292,7 +292,7 @@ for line in stream:
       print "pair %s = %s;" %(point_name, expr)
     if draw_point:
       if label_point:
-        if (args.softlabel and not force_dot):
+        if (args.softlabel and not force_dot) or (not args.softlabel and force_dot):
           dot_code += "label(\"$%s$\", %s, %s);\n" %(label_name, point_name, direction)
         else:
           dot_code += "dot(\"$%s$\", %s, %s);\n" %(label_name, point_name, direction)
