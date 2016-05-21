@@ -26,4 +26,4 @@ To start off, you need to have a [Python 2.7 installation](https://www.python.or
 
 ### How do I use TSQX?
 
-(I'm going to write docs for using TSQX, do remind me to do that.)
+[Here](https://github.com/cjquines/tsqx/wiki/Documentation) is a working draft for the documentation of TSQX. A tutorial for TSQX is also being written.
