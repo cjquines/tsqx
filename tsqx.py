@@ -72,7 +72,7 @@ def autoParen(tokens):
       args = [autoParen(tokens) for i in xrange(nargs)]
       return t + '(' + ', '.join(args) + ')'
     else:
-      return t
+      return t.replace("'", "p") # primes
   else:
     if t in short_names:
         t = short_names[t]
@@ -81,7 +81,7 @@ def autoParen(tokens):
         args = [autoParen(tokens) for i in xrange(nargs)]
         return t + '(' + ', '.join(args) + ')'
     else:
-      return t
+      return t.replace("'", "p") # primes
 
 def generatePoints(poly_name, num_sides):
   if poly_name == 'cyclic':
