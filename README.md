@@ -1,10 +1,6 @@
 # TSQX
 
-Asymptote preprocessor, based on Evan Chen’s TSQ.
-
-### Wait, what?
-
-[Asymptote](https://www.artofproblemsolving.com/wiki/index.php/Asymptote_(Vector_Graphics_Language)) is a vector graphics language. Lots of people use it to make diagrams for geometry problems. It works by a making a diagram from code. [TSQ](https://github.com/vEnhance/dotfiles/blob/master/py-scripts/tsq.py) is an Asymptote preprocessor created by Evan Chen – it’s used to make Asymptote code easier to write and neater to look at. And TSQX is an extension of TSQ, which I made because I thought TSQ was a nice idea, and it can be made even better! Check how easy it is to make a diagram in TSQX:
+[Asymptote](https://www.artofproblemsolving.com/wiki/index.php/Asymptote_(Vector_Graphics_Language)) preprocessor, based on [TSQ](https://github.com/vEnhance/dotfiles/blob/main/py-scripts/tsq.py). Sample:
 
 ```
 ~triangle A B C
@@ -20,10 +16,8 @@ B--F dashed blue
 
 ![Sample TSQX diagram](http://i.imgur.com/JxLfxxh.png)
 
-### How do I install TSQX?
+## Usage
 
-To start off, you need to have a [Python 2.7 installation](https://www.python.org/downloads/) on your machine. You need an [Asymptote](https://www.artofproblemsolving.com/wiki/index.php/Asymptote_(Vector_Graphics_Language)) installation if you want to be able to view the diagrams. Save your TSQX code to any plain text file, making sure that ```tsqx.py``` is in the same folder, and then run ```python tsqx.py filename.txt > filename.asy``` on the command line. After that, you can either include ```filename.asy``` on a TeX file, or just do ```asy filename.asy``` directly on the command line to generate your diagram.
+Run ```python3 tsqx.py filename.txt > filename.asy```; see extra arguments in the file itself.
 
-### How do I use TSQX?
-
-[Here](https://github.com/cjquines/tsqx/wiki/Documentation) is a working draft for the documentation of TSQX. A tutorial for TSQX is also being written.
+[Here](https://github.com/cjquines/tsqx/wiki/Documentation) is a working draft for the documentation of TSQX.
