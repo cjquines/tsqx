@@ -10,6 +10,8 @@ import argparse, enum, sys
 class Op:
     def _emit_exp(self, exp):
         pass # TODO
+        # needs to handle both (1/2, 1) and (foot A B C)
+        # the latter will be in func_mode, the former won't?
 
     def emit(self):
         raise Exception("Operation not recognized")
@@ -51,6 +53,7 @@ class Parser:
         pass
 
     def tokenize(self, line):
+        line = line + " "
         for old, new in [
             ("=", " = "),
             ("(", "( "),
@@ -62,6 +65,8 @@ class Parser:
             ("- ", "-"),
             (" *", "*"),
             ("* ", "*"),
+            # ensures slashes in draw ops remain as tokens
+            (" / ", "  /  "),
             (" /", "/"),
             ("/ ", "/"),
             # TODO prime support

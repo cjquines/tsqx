@@ -4,17 +4,18 @@
 
 ```
 ~triangle A B C
-D = foot A B C
-E = midpoint A--B
-F = extension A D C E
+D := foot A B C
+E .= midpoint A--B
+F ;= extension A (foot A B C) C E
 
-A--B--C--cycle 0.2 lightblue / black
+A--B--C--cycle / black
+circle A B C / 0.2 lightblue /
 A--D
 C--E
-B--F dashed blue
+B--F / dashed blue
 ```
 
-![Sample TSQX diagram](http://i.imgur.com/JxLfxxh.png)
+<!-- ![Sample TSQX diagram](http://i.imgur.com/JxLfxxh.png) replace with generatede code / actual diagram -->
 
 ## Usage
 
