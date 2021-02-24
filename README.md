@@ -18,6 +18,4 @@ B--F dashed blue
 
 ## Usage
 
-Run ```python3 tsqx.py filename.txt > filename.asy```; see extra arguments in the file itself.
-
-[Here](https://github.com/cjquines/tsqx/wiki/Documentation) is a working draft for the documentation of TSQX.
+Run ```python3 tsqx.py filename.txt > filename.asy```. See [wiki](https://github.com/cjquines/tsqx/wiki/Documentation) for more info.

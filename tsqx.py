@@ -4,9 +4,51 @@
 
 # original TSQ by evan chen
 
-import sys
-import string
-import argparse
+import argparse, sys
+
+
+def tokenize(line):
+    for old, new in [
+        ("=", " = "),
+        ("(", "( "),
+        (")", " ) "),
+        (",", " , "),
+        (" +", "+"),
+        ("+ ", "+"),
+        (" -", "-"),
+        ("- ", "-"),
+        (" *", "*"),
+        ("* ", "*"),
+        (" /", "/"),
+        ("/ ", "/"),
+    ]:
+        line = line.replace(old, new)
+    return filter(None, line.split())
+
+
+def parse_tokens(tokens):
+    def subexp(index, fn_mode=False):
+        try:
+            token = tokens[index]
+        except IndexError:
+            raise SyntaxError("not enough tokens")
+        if token[-1] == "(":
+            subexp(index, len(token) > 1)
+
+    token = token.pop
+
+
+def parse(line):
+    line, comment = line.split("//", 1)
+    tokens = tokenize(line)
+    # parse the two cases of lines
+    if "=" in tokens:
+        pass
+    return parse_tokens(tokenize(line)), comment
+
+
+# old code:
+
 
 fn_names = {
     "circumcenter": 3,
@@ -58,10 +100,6 @@ polygons = {
     "cyclic": ["generate"],
     "regular": ["generate"],
 }
-
-# The following is really bad
-for letter in string.ascii_uppercase:
-    fn_names["-%s+2*foot" % letter] = 3
 
 
 def autoParen(tokens):
