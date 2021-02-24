@@ -8,15 +8,18 @@ import argparse, enum, sys
 
 
 class Op:
-    def emit():
+    def _emit_exp(self, exp):
+        pass
+
+    def emit(self):
         raise Exception("Operation not recognized")
 
-    def post_emit():
+    def post_emit(self):
         return None
 
 
 class Blank(Op):
-    def emit():
+    def emit(self):
         return ""
 
 
@@ -26,10 +29,10 @@ class Point(Op):
         self.exp = exp
         self.options = options
 
-    def emit():
+    def emit(self):
         pass
 
-    def post_emit():
+    def post_emit(self):
         pass
 
 
@@ -38,7 +41,7 @@ class Draw(Op):
         self.exp = exp
         self.options = options
 
-    def emit():
+    def emit(self):
         pass
 
 
@@ -66,7 +69,35 @@ class Parser:
         return filter(None, line.split())
 
     def parse_name(self, tokens):
-        pass
+        if not tokens:
+            raise SyntaxError("Can't parse point name")
+        name, *rest = tokens
+
+        aliases = {"": "dl", ":": "", ".": "d", ";": "l"}
+        if rest:
+            *rest, opts = rest
+            if opts not in aliases.keys() and opts not in aliases.values():
+                rest.push(opts)
+                opts = ""
+        else:
+            opts = ""
+        opts = aliases.get(opts, opts)
+        options = {"dot": "d" in opts, "label": "l" in opts}
+
+        if rest:
+            dirs, *rest = rest
+            if dir_pairs := re.findall(r"(\d+)([A-Z]+)", dirs):
+                options["direction"] = "".join(f"{n}*plain.{w}" for n, w in dir_pairs)
+            elif dirs.isdigit():
+                options["direction"] = f"dir({dirs})"
+            else:
+                options["direction"] = f"plain.{dirs}"
+        else:
+            options["direction"] = f"dir({name})"
+
+        if rest:
+            raise SyntaxError("Can't parse point name")
+        return name, options
 
     def parse_draw(self, tokens):
         pass
@@ -105,7 +136,7 @@ class Parser:
         tokens = tokenize(line)
         if not tokens:
             return Blank(), comment
-        # point case
+        # point
         try:
             idx = tokens.index("=")
             name, options = self.parse_name(tokens[:idx])
