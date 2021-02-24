@@ -9,7 +9,7 @@ import argparse, enum, sys
 
 class Op:
     def _emit_exp(self, exp):
-        pass
+        pass # TODO
 
     def emit(self):
         raise Exception("Operation not recognized")
@@ -30,10 +30,10 @@ class Point(Op):
         self.options = options
 
     def emit(self):
-        pass
+        pass # TODO
 
     def post_emit(self):
-        pass
+        pass # TODO
 
 
 class Draw(Op):
@@ -42,12 +42,12 @@ class Draw(Op):
         self.options = options
 
     def emit(self):
-        pass
+        pass # TODO
 
 
 class Parser:
     def __init__(self):
-        # add options later
+        # TODO add options
         pass
 
     def tokenize(self, line):
@@ -64,6 +64,7 @@ class Parser:
             ("* ", "*"),
             (" /", "/"),
             ("/ ", "/"),
+            # TODO prime support
         ]:
             line = line.replace(old, new)
         return filter(None, line.split())
@@ -82,7 +83,8 @@ class Parser:
         else:
             opts = ""
         opts = aliases.get(opts, opts)
-        options = {"dot": "d" in opts, "label": "l" in opts}
+        # TODO prime support for label
+        options = {"dot": "d" in opts, "label": "l" in opts and name}
 
         if rest:
             dirs, *rest = rest
@@ -100,7 +102,15 @@ class Parser:
         return name, options
 
     def parse_draw(self, tokens):
-        pass
+        try:
+            idx = tokens.index("/")
+            fill = tokens[:idx]
+            outline = tokens[idx + 1 :]
+        except ValueError:
+            fill = []
+            outline = tokens
+        # TODO a fillpen with a digit should be opacity
+        return {"fill": "+".join(fill), "outline": "+".join(outline)}
 
     def parse_subexp(self, tokens, idx, func_mode=False):
         token = tokens[idx]
@@ -132,8 +142,8 @@ class Parser:
         return res
 
     def parse(self, line):
-        line, comment = line.split("//", 1)
-        tokens = tokenize(line)
+        line, comment = line.split("#", 1)
+        tokens = self.tokenize(line)
         if not tokens:
             return Blank(), comment
         # point
