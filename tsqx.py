@@ -4,7 +4,28 @@
 
 # original TSQ by evan chen
 
-import argparse, sys
+import argparse, enum, sys
+
+
+class Op:
+    pass
+
+
+class Blank(Op):
+    pass
+
+
+class Point(Op):
+    def __init__(self, name, exp, **options):
+        self.name = name
+        self.exp = exp
+        self.options = options
+
+
+class Draw(Op):
+    def __init__(self, exp, **options):
+        self.exp = exp
+        self.options = options
 
 
 def tokenize(line):
@@ -26,26 +47,69 @@ def tokenize(line):
     return filter(None, line.split())
 
 
-def parse_tokens(tokens):
-    def subexp(index, fn_mode=False):
-        try:
-            token = tokens[index]
-        except IndexError:
-            raise SyntaxError("not enough tokens")
-        if token[-1] == "(":
-            subexp(index, len(token) > 1)
+def parse_name(tokens):
+    pass
 
-    token = token.pop
+
+def parse_draw(tokens):
+    pass
+
+
+def parse_exp(tokens):
+    def subexp(idx, func_mode=False):
+        token = tokens[idx]
+        if token[-1] == "(":
+            is_func = len(token) > 1
+            res = []
+            idx += 1
+            if is_func:
+                res.append(token[:-1])
+            while tokens[idx] != ")":
+                exp, idx = subexp(idx, is_func)
+                res.append(exp)
+            return res, idx + 1
+        if token == "," and func_mode:
+            return "", idx + 1
+        return token, idx + 1
+
+    if tokens[0][-1] != "(":
+        tokens = ["(", *tokens, ")"]
+
+    res = []
+    idx = 0
+    while idx != len(tokens):
+        try:
+            exp, idx = subexp(idx)
+            res.append(filter(None, exp))
+        except IndexError:
+            raise SyntaxError("Unexpected end of line")
+    return res
 
 
 def parse(line):
     line, comment = line.split("//", 1)
     tokens = tokenize(line)
-    # parse the two cases of lines
-    if "=" in tokens:
+    if not tokens:
+        return Blank(), comment
+    # point case
+    try:
+        idx = tokens.index("=")
+        name, options = parse_name(tokens[:idx])
+        exp = parse_exp(tokens[idx+1:])
+        return Point(name, exp, **options), comment
+    except ValueError:
         pass
-    return parse_tokens(tokenize(line)), comment
-
+    # draw with options
+    try:
+        idx = tokens.index("/")
+        exp = parse_exp(tokens[:idx])
+        options = parse_draw(tokens[idx+1:])
+        return Draw(exp, **options), comment
+    except ValueError:
+        pass
+    # draw without options
+    exp = parse_exp(tokens)
+    return Draw(exp, {}), comment
 
 # old code:
 
