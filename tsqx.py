@@ -4,14 +4,25 @@
 
 # original TSQ by evan chen
 
-import enum, sys
+import enum, re, sys
 
 
 class Op:
+    def _join_exp(self, exp, join_str):
+        return join_str.join(self._emit_exp(e) for e in exp)
+
     def _emit_exp(self, exp):
-        pass  # TODO
-        # needs to handle both (1/2, 1) and (foot A B C)
-        # the latter will be in func_mode, the former won't?
+        if not isinstance(exp, list):
+            return exp
+        if "," in exp:
+            return "(" + self._join_exp(exp, " ") + ")"
+        head, *tail = exp
+        if not tail:
+            return head
+        return head + "(" + self._join_exp(tail, ", ") + ")"
+
+    def emit_exp(self):
+        return self._join_exp(self.exp, "*")
 
     def emit(self):
         raise Exception("Operation not recognized")
@@ -29,10 +40,12 @@ class Point(Op):
     def __init__(self, name, exp, **options):
         self.name = name
         self.exp = exp
-        self.options = options
+        self.dot = options.get("dot", True)
+        self.label = options.get("label", True)
+        self.direction = options.get("direction", None)
 
     def emit(self):
-        pass  # TODO
+        return f"pair {self.name} = {self.emit_exp()};"
 
     def post_emit(self):
         pass  # TODO
@@ -41,10 +54,18 @@ class Point(Op):
 class Draw(Op):
     def __init__(self, exp, **options):
         self.exp = exp
-        self.options = options
+        self.fill = options.get("fill", None)
+        self.outline = options.get("outline", None)
 
     def emit(self):
-        pass  # TODO
+        exp = self.emit_exp()
+        if self.fill:
+            outline = self.outline or "defaultpen"
+            return f"filldraw({exp}, {self.fill}, {outline});"
+        elif self.outline:
+            return f"draw({exp}, {self.outline});"
+        else:
+            return f"draw({exp});"
 
 
 class Parser:
@@ -53,7 +74,7 @@ class Parser:
         pass
 
     def tokenize(self, line):
-        line = line + " "
+        line = line.strip() + " "
         for old, new in [
             ("=", " = "),
             ("(", "( "),
@@ -175,7 +196,7 @@ class Parser:
 def main():
     from argparse import ArgumentParser
 
-    argparser = ArgumentParser(description="Generate a diagram.")
+    argparser = ArgumentParser(description="Generate Asymptote code.")
     argparser.add_argument(
         "-p",
         "--pre",
@@ -223,7 +244,7 @@ def main():
         print("size(%s);" % args.size)
         print("defaultpen(fontsize(9pt));")
         print('settings.outformat="pdf";')
-    if args.fname != "":
+    if args.fname:
         stream = open(args.fname, "r")
     else:
         stream = sys.stdin
