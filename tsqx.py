@@ -41,14 +41,21 @@ class Point(Op):
         self.name = name
         self.exp = exp
         self.dot = options.get("dot", True)
-        self.label = options.get("label", True)
+        self.label = options.get("label", name)
         self.direction = options.get("direction", None)
 
     def emit(self):
         return f"pair {self.name} = {self.emit_exp()};"
 
     def post_emit(self):
-        pass  # TODO
+        args = [self.name]
+        if self.label:
+            args.append(f'"${self.label}$"')
+            args.append(self.direction)
+        if self.dot:
+            return "dot(" + ", ".join(args) + ");"
+        if len(args) > 1:
+            return "label(" + ", ".join(args) + ");"
 
 
 class Draw(Op):
@@ -115,7 +122,7 @@ class Parser:
         if rest:
             dirs, *rest = rest
             if dir_pairs := re.findall(r"(\d+)([A-Z]+)", dirs):
-                options["direction"] = "".join(f"{n}*plain.{w}" for n, w in dir_pairs)
+                options["direction"] = "+".join(f"{n}*plain.{w}" for n, w in dir_pairs)
             elif dirs.isdigit():
                 options["direction"] = f"dir({dirs})"
             else:
@@ -250,9 +257,13 @@ def main():
         stream = sys.stdin
 
     parser = Parser()
-    for line in stream:
-        op, comment = parser.parse(line)
+    ops = [parser.parse(line) for line in stream]
+    for op, comment in ops:
         print(op.emit())
+    print("")
+    for op, comment in ops:
+        if op.post_emit():
+            print(op.post_emit())
 
 
 if __name__ == "__main__":
