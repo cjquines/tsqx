@@ -209,6 +209,34 @@ class Parser:
         return Draw(exp), comment
 
 
+class Emitter:
+    def __init__(self, lines, print_=print, **args):
+        self.lines = lines
+        self.print = print_
+        self.preamble = args.get("preamble", False)
+        self.size = args.get("size", "8cm")
+        self.parser = Parser(**args)
+
+    def emit(self):
+        if self.preamble:
+            self.print("import olympiad;")
+            self.print("import cse5;")
+            self.print("size(%s);" % self.size)
+            self.print("defaultpen(fontsize(9pt));")
+            self.print('settings.outformat="pdf";')
+
+        ops = [self.parser.parse(line) for line in self.lines]
+        for op, comment in ops:
+            out = op.emit()
+            if comment:
+                out = f"{out} //{comment[0]}".strip()
+            self.print(out)
+        self.print()
+        for op, comment in ops:
+            if out := op.post_emit():
+                self.print(out)
+
+
 def main():
     from argparse import ArgumentParser
 
@@ -247,32 +275,15 @@ def main():
     argparser.add_argument(
         "-sl",
         "--soft-label",
-        help="Does not mark points, only labels them.",
+        help="Don't draw dots on points by default.",
         action="store_true",
-        dest="softlabel",
+        dest="soft_label",
         default=False,
     )
     args = argparser.parse_args()
-
-    if args.preamble:
-        print("import olympiad;")
-        print("import cse5;")
-        print("size(%s);" % args.size)
-        print("defaultpen(fontsize(9pt));")
-        print('settings.outformat="pdf";')
-    if args.fname:
-        stream = open(args.fname, "r")
-    else:
-        stream = sys.stdin
-
-    parser = Parser()
-    ops = [parser.parse(line) for line in stream]
-    for op, comment in ops:
-        print(op.emit())
-    print("")
-    for op, comment in ops:
-        if op.post_emit():
-            print(op.post_emit())
+    stream = open(args.fname, "r") if args.fname else sys.stdin
+    emitter = Emitter(stream, print, **vars(args))
+    emitter.emit()
 
 
 if __name__ == "__main__":
