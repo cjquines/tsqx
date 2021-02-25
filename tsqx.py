@@ -149,15 +149,14 @@ class Parser:
         if not tokens:
             raise SyntaxError("Can't parse special command")
         head, *tail = tokens
-        res = []
         if comment:
-            res.append((Blank(), comment))
+            yield Blank(), comment
         if head in ["triangle", "regular"]:
             for name, exp in zip(tail, generate_points(head, len(tail))):
-                res.append((Point(name, [exp]), None))
+                yield Point(name, [exp]), None
+            return
         else:
             raise SyntaxError("Special command not recognized")
-        return res
 
     def parse_name(self, tokens):
         if not tokens:
@@ -210,16 +209,19 @@ class Parser:
         line, *comment = line.split("#", 1)
         tokens = self.tokenize(line)
         if not tokens:
-            return [(Blank(), comment)]
+            yield (Blank(), comment)
+            return
         # special
         if tokens[0] == "~":
-            return self.parse_special(tokens[1:], comment)
+            yield from self.parse_special(tokens[1:], comment)
+            return
         # point
         try:
             idx = tokens.index("=")
             name, options = self.parse_name(tokens[:idx])
             exp = self.parse_exp(tokens[idx + 1 :])
-            return [(Point(name, exp, **options), comment)]
+            yield Point(name, exp, **options), comment
+            return
         except ValueError:
             pass
         # draw with options
@@ -227,12 +229,14 @@ class Parser:
             idx = tokens.index("/")
             exp = self.parse_exp(tokens[:idx])
             options = self.parse_draw(tokens[idx + 1 :])
-            return [(Draw(exp, **options), comment)]
+            yield Draw(exp, **options), comment
+            return
         except ValueError:
             pass
         # draw without options
         exp = self.parse_exp(tokens)
-        return [(Draw(exp), comment)]
+        yield Draw(exp), comment
+        return
 
 
 class Emitter:
