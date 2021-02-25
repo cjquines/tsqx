@@ -1,0 +1,9 @@
+D := foot A B C
+E .= midpoint A--B
+F ;= extension A (foot A B C) C E
+
+A--B--C--cycle / black
+circle A B C / 0.2 lightblue /
+A--D
+C--E
+B--F / dashed blue
