@@ -1,6 +1,6 @@
 D S := foot A B C
 E 1N2E .= midpoint(A--B)
-F 2NE ;= extension A (foot A B C) C E
+F' 2NE ;= extension A (foot A B C) C E
 G = (5, 7)
 H = (rotate 90 G)(F)
 
@@ -8,4 +8,4 @@ A--B--C--cycle / black
 circle A B C / 0.2 lightblue /
 A--D
 C--E
-B--F / dashed blue
+B--F' / dashed blue

@@ -93,11 +93,11 @@ class Parser:
             ("- ", "-"),
             (" *", "*"),
             ("* ", "*"),
-            # ensures slashes in draw ops remain as tokens
+            # ensures slashes in draw ops remain as tokens:
             (" / ", "  /  "),
             (" /", "/"),
             ("/ ", "/"),
-            # TODO prime support
+            ("'", "_prime"),
         ]:
             line = line.replace(old, new)
         return list(filter(None, line.split()))
@@ -116,8 +116,10 @@ class Parser:
         else:
             opts = ""
         opts = aliases.get(opts, opts)
-        # TODO prime support for label
-        options = {"dot": "d" in opts, "label": "l" in opts and name}
+        options = {
+            "dot": "d" in opts,
+            "label": "l" in opts and name.replace("_prime", "'"),
+        }
 
         if rest:
             dirs, *rest = rest
@@ -137,12 +139,19 @@ class Parser:
     def parse_draw(self, tokens):
         try:
             idx = tokens.index("/")
-            fill = tokens[:idx]
+            fill_ = tokens[:idx]
             outline = tokens[idx + 1 :]
         except ValueError:
-            fill = []
+            fill_ = []
             outline = tokens
-        # TODO a fillpen with a digit should be opacity
+
+        fill = []
+        for pen in fill_:
+            if re.fullmatch(r"\d*\.?\d*", pen):
+                fill.append(f"opacity({pen})")
+            else:
+                fill.append(pen)
+
         return {"fill": "+".join(fill), "outline": "+".join(outline)}
 
     def parse_subexp(self, tokens, idx, func_mode=False):
