@@ -76,9 +76,12 @@ class Draw(Op):
 
 
 class Parser:
-    def __init__(self):
-        # TODO add options
-        pass
+    def __init__(self, **args):
+        self.soft_label = args.get("soft_label", False)
+        self.alias_map = {"": "dl", ":": "", ".": "d", ";": "l"}
+        if self.soft_label:
+            self.alias_map |= {"": "l", ";": "dl"}
+        self.aliases = self.alias_map.keys() | self.alias_map.values()
 
     def tokenize(self, line):
         line = line.strip() + " "
@@ -107,15 +110,11 @@ class Parser:
             raise SyntaxError("Can't parse point name")
         name, *rest = tokens
 
-        aliases = {"": "dl", ":": "", ".": "d", ";": "l"}
-        if rest:
+        if rest and rest[-1] in self.aliases:
             *rest, opts = rest
-            if opts not in aliases.keys() and opts not in aliases.values():
-                rest.push(opts)
-                opts = ""
         else:
             opts = ""
-        opts = aliases.get(opts, opts)
+        opts = self.alias_map.get(opts, opts)
         options = {
             "dot": "d" in opts,
             "label": "l" in opts and name.replace("_prime", "'"),
@@ -244,22 +243,14 @@ def main():
     argparser.add_argument(
         "-p",
         "--pre",
-        help="Adds an Asymptote preamble.",
+        help="Adds a preamble.",
         action="store_true",
         dest="preamble",
         default=False,
     )
     argparser.add_argument(
-        "-n",
-        "--no-trans",
-        help="Temporarily disables the transparencies.",
-        action="store_true",
-        dest="notrans",
-        default=False,
-    )
-    argparser.add_argument(
         "fname",
-        help="If provided, reads from the designated file rather than stdin",
+        help="Read from file rather than stdin.",
         metavar="filename",
         nargs="?",
         default="",
@@ -267,7 +258,7 @@ def main():
     argparser.add_argument(
         "-s",
         "--size",
-        help="If provided, sets the image size in the preamble. (Use with -p.)",
+        help="Set image size in preamble.",
         action="store",
         dest="size",
         default="8cm",
