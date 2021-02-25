@@ -1,3 +1,4 @@
+~triangle A B C
 D S := foot A B C # comment
 E 1N2E .= midpoint(A--B)
 F' 2NE ;= extension A (foot A B C) C E

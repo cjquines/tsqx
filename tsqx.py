@@ -7,6 +7,14 @@
 import enum, re, sys
 
 
+def generate_points(kind, n):
+    if kind == "triangle":
+        return ["dir(110)", "dir(210)", "dir(330)"]
+    elif kind == "regular":
+        return [f"dir({(90 + i*360/n) % 360})" for i in range(n)]
+    raise SyntaxError("Special command not recognized")
+
+
 class Op:
     def _join_exp(self, exp, join_str):
         return join_str.join(self._emit_exp(e) for e in exp)
@@ -42,7 +50,9 @@ class Point(Op):
         self.exp = exp
         self.dot = options.get("dot", True)
         self.label = options.get("label", name)
-        self.direction = options.get("direction", None)
+        if self.label:
+            self.label = self.label.replace("_prime", "'")
+        self.direction = options.get("direction", f"dir({name})")
 
     def emit(self):
         return f"pair {self.name} = {self.emit_exp()};"
@@ -86,6 +96,7 @@ class Parser:
     def tokenize(self, line):
         line = line.strip() + " "
         for old, new in [
+            ("~", " ~ "),
             ("=", " = "),
             ("(", "( "),
             (")", " ) "),
@@ -105,6 +116,49 @@ class Parser:
             line = line.replace(old, new)
         return list(filter(None, line.split()))
 
+    def parse_subexp(self, tokens, idx, func_mode=False):
+        token = tokens[idx]
+        if token[-1] == "(":
+            is_func = len(token) > 1
+            res = []
+            idx += 1
+            if is_func:
+                res.append(token[:-1])
+            while tokens[idx] != ")":
+                exp, idx = self.parse_subexp(tokens, idx, is_func)
+                res.append(exp)
+            return res, idx + 1
+        if token == "," and func_mode:
+            return "", idx + 1
+        return token, idx + 1
+
+    def parse_exp(self, tokens):
+        if tokens[0][-1] != "(":
+            tokens = ["(", *tokens, ")"]
+        res = []
+        idx = 0
+        while idx != len(tokens):
+            try:
+                exp, idx = self.parse_subexp(tokens, idx)
+                res.append(list(filter(None, exp)))
+            except IndexError:
+                raise SyntaxError("Unexpected end of line")
+        return res
+
+    def parse_special(self, tokens, comment):
+        if not tokens:
+            raise SyntaxError("Can't parse special command")
+        head, *tail = tokens
+        res = []
+        if comment:
+            res.append((Blank(), comment))
+        if head in ["triangle", "regular"]:
+            for name, exp in zip(tail, generate_points(head, len(tail))):
+                res.append((Point(name, [exp]), None))
+        else:
+            raise SyntaxError("Special command not recognized")
+        return res
+
     def parse_name(self, tokens):
         if not tokens:
             raise SyntaxError("Can't parse point name")
@@ -115,10 +169,7 @@ class Parser:
         else:
             opts = ""
         opts = self.alias_map.get(opts, opts)
-        options = {
-            "dot": "d" in opts,
-            "label": "l" in opts and name.replace("_prime", "'"),
-        }
+        options = {"dot": "d" in opts, "label": "l" in opts and name}
 
         if rest:
             dirs, *rest = rest
@@ -155,46 +206,20 @@ class Parser:
 
         return {"fill": "+".join(fill), "outline": "+".join(outline)}
 
-    def parse_subexp(self, tokens, idx, func_mode=False):
-        token = tokens[idx]
-        if token[-1] == "(":
-            is_func = len(token) > 1
-            res = []
-            idx += 1
-            if is_func:
-                res.append(token[:-1])
-            while tokens[idx] != ")":
-                exp, idx = self.parse_subexp(tokens, idx, is_func)
-                res.append(exp)
-            return res, idx + 1
-        if token == "," and func_mode:
-            return "", idx + 1
-        return token, idx + 1
-
-    def parse_exp(self, tokens):
-        if tokens[0][-1] != "(":
-            tokens = ["(", *tokens, ")"]
-        res = []
-        idx = 0
-        while idx != len(tokens):
-            try:
-                exp, idx = self.parse_subexp(tokens, idx)
-                res.append(list(filter(None, exp)))
-            except IndexError:
-                raise SyntaxError("Unexpected end of line")
-        return res
-
     def parse(self, line):
         line, *comment = line.split("#", 1)
         tokens = self.tokenize(line)
         if not tokens:
-            return Blank(), comment
+            return [(Blank(), comment)]
+        # special
+        if tokens[0] == "~":
+            return self.parse_special(tokens[1:], comment)
         # point
         try:
             idx = tokens.index("=")
             name, options = self.parse_name(tokens[:idx])
             exp = self.parse_exp(tokens[idx + 1 :])
-            return Point(name, exp, **options), comment
+            return [(Point(name, exp, **options), comment)]
         except ValueError:
             pass
         # draw with options
@@ -202,12 +227,12 @@ class Parser:
             idx = tokens.index("/")
             exp = self.parse_exp(tokens[:idx])
             options = self.parse_draw(tokens[idx + 1 :])
-            return Draw(exp, **options), comment
+            return [(Draw(exp, **options), comment)]
         except ValueError:
             pass
         # draw without options
         exp = self.parse_exp(tokens)
-        return Draw(exp), comment
+        return [(Draw(exp), comment)]
 
 
 class Emitter:
@@ -226,7 +251,7 @@ class Emitter:
             self.print("defaultpen(fontsize(9pt));")
             self.print('settings.outformat="pdf";')
 
-        ops = [self.parser.parse(line) for line in self.lines]
+        ops = [oc for line in self.lines for oc in self.parser.parse(line)]
         for op, comment in ops:
             out = op.emit()
             if comment:
