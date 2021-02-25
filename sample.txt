@@ -1,14 +1,9 @@
 ~triangle A B C
-D S := foot A B C # comment
-E 1N2E .= midpoint(A--B)
-F' 2NE ;= extension A (foot A B C) C E
-G = (5, 7)
-H = (rotate 90 G)(F)
+D ;= foot A B C
+E := midpoint A--B
+F' N = (rotate -30 E)(extension A (foot A B C) C E)
 
-# empty comment
-
-A--B--C--cycle / black
-circle A B C / 0.2 lightblue /
+circumcircle A B C / 0.2 lightgray /
+A--B--C--cycle
 A--D
-C--E
 B--F' / dashed blue

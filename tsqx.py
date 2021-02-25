@@ -60,8 +60,7 @@ class Point(Op):
     def post_emit(self):
         args = [self.name]
         if self.label:
-            args.append(f'"${self.label}$"')
-            args.append(self.direction)
+            args = [f'"${self.label}$"', *args, self.direction]
         if self.dot:
             return "dot(" + ", ".join(args) + ");"
         if len(args) > 1:
@@ -103,7 +102,6 @@ class Parser:
             (",", " , "),
             (" +", "+"),
             ("+ ", "+"),
-            (" -", "-"),
             ("- ", "-"),
             (" *", "*"),
             ("* ", "*"),
