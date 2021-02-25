@@ -126,9 +126,11 @@ class Parser:
                 options["direction"] = "+".join(f"{n}*plain.{w}" for n, w in dir_pairs)
             elif dirs.isdigit():
                 options["direction"] = f"dir({dirs})"
-            else:
+            elif re.fullmatch(r"N?S?E?W?", dirs):
                 options["direction"] = f"plain.{dirs}"
-        else:
+            else:
+                rest.append(dirs)
+        if "direction" not in options:
             options["direction"] = f"dir({name})"
 
         if rest:
