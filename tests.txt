@@ -1,0 +1,45 @@
+~triangle A B C
+
+P = (1, 2)
+P = foot A B C
+P = foot(A, B, C)
+P = dir(180)
+
+# comment
+P := dir(1, 2) # comment
+
+P_1 ;= foot A B C
+P_2 := foot A B C
+P_3 dl= foot A B C
+P_4 d= foot A B C
+P_5 l= foot A B C
+
+P_6 S = (1, 2)
+P_7 NE = (1, 2)
+P_8 4E2N = (1, 2)
+P_9 1N1SE1N = (1, 2)
+
+P := midpoint A--B
+P := midpoint (foot A B C)--B
+P := midpoint B--(foot A B C)
+P := midpoint (foot A B C)--(foot B C A)
+
+# P := (rotate -30 E)D
+# P := (rotate -30 E)(D)
+P := (rotate -30 E)(foot A B C)
+P := (shift (0, 1))(rotate -30 E)(foot A B C)
+P := (rotate -30 E)(extension A (foot A B C) C E)
+
+A--B--C--cycle
+(foot A B C)--D
+D--(foot A B C)
+(foot A B C)--(foot B C A)
+circumcircle A B C
+circumcircle A (extension A B C D) E
+
+A--B / blue
+A--B / dashed
+A--B / dashed blue
+A--B--C--cycle / lightgray / blue
+A--B--C--cycle / 0.2 lightgray / dashed blue
+A--B--C--cycle / 0.2 lightgray /
