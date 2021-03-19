@@ -95,20 +95,24 @@ class Parser:
     def tokenize(self, line):
         line = line.strip() + " "
         for old, new in [
+            # ~ and = are separate tokens
             ("~", " ~ "),
             ("=", " = "),
+            # for tsqx syntax processing
             ("(", "( "),
             (")", " ) "),
             (",", " , "),
+            # no spaces around asymptote arithmetic
             (" +", "+"),
             ("+ ", "+"),
             ("- ", "-"),
             (" *", "*"),
             ("* ", "*"),
-            # ensures slashes in draw ops remain as tokens:
+            # but slashes in draw ops should remain tokens
             (" / ", "  /  "),
             (" /", "/"),
             ("/ ", "/"),
+            # ' not allowed in variable names
             ("'", "_prime"),
         ]:
             line = line.replace(old, new)
