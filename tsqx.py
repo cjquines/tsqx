@@ -23,22 +23,18 @@ class Op:
         if not isinstance(exp, list):
             return exp
         if "," in exp:
-            return "(" + self._join_exp(exp, " ") + ")"
-        if any(s == exp[1] for s in ["--", "..", "^^"]):
+            return f"({self._join_exp(exp, ' ')})"
+        if exp[1] in ["--", "..", "^^"]:
             return self._join_exp(exp, ", ")
         head, *tail = exp
         if not tail:
             return head
-        return head + "(" + self._join_exp(tail, ", ") + ")"
+        return f"{head}({self._join_exp(tail, ', ')})"
 
     def emit_exp(self):
         res = self._join_exp(self.exp, "*")
-        # hack to deal with joiners
-        if any(s in res for s in ["--", "..", "^^"]):
-            res = res.replace(", --, ", "--")
-            res = res.replace(", .., ", "..")
-            res = res.replace(", ^^, ", "^^")
-            return res
+        for j in ["--", "..", "^^"]:
+            res = res.replace(f", {j}, ", j)
         return res
 
     def emit(self):
@@ -71,9 +67,9 @@ class Point(Op):
         if self.label:
             args = [f'"${self.label}$"', *args, self.direction]
         if self.dot:
-            return "dot(" + ", ".join(args) + ");"
+            return f"dot({', '.join(args)});"
         if len(args) > 1:
-            return "label(" + ", ".join(args) + ");"
+            return f"label({', '.join(args)});"
 
 
 class Draw(Op):
