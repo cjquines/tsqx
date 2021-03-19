@@ -24,13 +24,22 @@ class Op:
             return exp
         if "," in exp:
             return "(" + self._join_exp(exp, " ") + ")"
+        if any(s == exp[1] for s in ["--", "..", "^^"]):
+            return self._join_exp(exp, ", ")
         head, *tail = exp
         if not tail:
             return head
         return head + "(" + self._join_exp(tail, ", ") + ")"
 
     def emit_exp(self):
-        return self._join_exp(self.exp, "*")
+        res = self._join_exp(self.exp, "*")
+        # hack to deal with joiners
+        if any(s in res for s in ["--", "..", "^^"]):
+            res = res.replace(", --, ", "--")
+            res = res.replace(", .., ", "..")
+            res = res.replace(", ^^, ", "^^")
+            return res
+        return res
 
     def emit(self):
         raise Exception("Operation not recognized")
@@ -102,6 +111,10 @@ class Parser:
             ("(", "( "),
             (")", " ) "),
             (",", " , "),
+            # spline joiners
+            ("--", " --  "),
+            ("..", " .. "),
+            ("^^", " ^^ "),
             # no spaces around asymptote arithmetic
             (" +", "+"),
             ("+ ", "+"),
@@ -135,7 +148,7 @@ class Parser:
         return token, idx + 1
 
     def parse_exp(self, tokens):
-        if tokens[0][-1] != "(":
+        if tokens[0][-1] != "(" or tokens[-1] != ")":
             tokens = ["(", *tokens, ")"]
         res = []
         idx = 0
