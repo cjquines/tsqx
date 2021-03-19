@@ -24,8 +24,7 @@ P := midpoint (foot A B C)--B
 P := midpoint B--(foot A B C)
 P := midpoint (foot A B C)--(foot B C A)
 
-# P := (rotate -30 E)D
-# P := (rotate -30 E)(D)
+P := (rotate -30 E)(D)
 P := (rotate -30 E)(foot A B C)
 P := (shift (0, 1))(rotate -30 E)(foot A B C)
 P := (rotate -30 E)(extension A (foot A B C) C E)

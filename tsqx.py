@@ -24,11 +24,11 @@ class Op:
             return exp
         if "," in exp:
             return f"({self._join_exp(exp, ' ')})"
-        if exp[1] in ["--", "..", "^^"]:
-            return self._join_exp(exp, ", ")
         head, *tail = exp
         if not tail:
             return head
+        if tail[0] in ["--", "..", "^^"]:
+            return self._join_exp(exp, ", ")
         return f"{head}({self._join_exp(tail, ', ')})"
 
     def emit_exp(self):
