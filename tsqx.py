@@ -4,7 +4,7 @@
 
 # original TSQ by evan chen
 
-import enum, re, sys
+import re, sys
 
 
 def generate_points(kind, n):
