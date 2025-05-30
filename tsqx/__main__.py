@@ -236,18 +236,20 @@ class Parser:
     def parse_special(
         self,
         tokens: list[T_TOKEN],
-        comment: str | None,
+        comment: str,
         raw_line: str,
     ) -> Generator[T_OCR, None, None]:
         if not tokens:
             raise SyntaxError("Can't parse special command")
         head, *tail = tokens
-        if comment is not None:
+        if comment == "":
+            yield {"op": Blank(), "comment": "", "raw": raw_line}
+        else:
             yield {"op": Blank(), "comment": comment, "raw": raw_line}
         if head in ["triangle", "regular"]:
             for name, exp in zip(tail, generate_points(head, len(tail))):
                 assert isinstance(name, str)
-                yield {"op": Point(name, [exp]), "comment": "", "raw": raw_line}
+                yield {"op": Point(name, [exp]), "comment": "", "raw": ""}
             return
         else:
             raise SyntaxError("Special command not recognized")
@@ -382,7 +384,10 @@ class Emitter:
 
         for ocr in ocrs:
             print(
-                ocr["op"].emit() + (f" //{c}" if (c := ocr["comment"].rstrip()) else "")
+                (
+                    ocr["op"].emit()
+                    + (f" // {c}" if (c := ocr["comment"].rstrip()) else "")
+                ).strip()
             )
         print()
 
@@ -397,8 +402,7 @@ class Emitter:
             print(r"| https://github.com/vEnhance/tsqx |")
             print(r"+----------------------------------+")
             for ocr in ocrs:
-                if x := ocr["raw"].strip():
-                    print(x)
+                print(ocr["raw"].strip())
             print("*/")
 
 
