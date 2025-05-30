@@ -11,7 +11,7 @@ from io import TextIOWrapper
 from typing import Any, Generator, TextIO, TypedDict
 
 
-def generate_points(kind, n) -> list[str]:
+def generate_points(kind: str, n: int) -> list[str]:
     if kind == "triangle":
         return ["dir(110)", "dir(210)", "dir(330)"]
     elif kind == "regular":
@@ -83,7 +83,7 @@ class Op:
             res = res.replace(f", {j}, ", j)
         return res
 
-    def emit(self):
+    def emit(self) -> str:
         raise Exception("Operation not recognized")
 
     def post_emit(self):
