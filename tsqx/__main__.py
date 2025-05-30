@@ -25,7 +25,6 @@ T_TOKEN = str | list[str] | list["T_TOKEN"]
 class T_OCR(TypedDict):  # op, comment, raw
     op: "Op"
     comment: str
-    raw: str
 
 
 GENERIC_PREAMBLE = r"""
@@ -237,19 +236,18 @@ class Parser:
         self,
         tokens: list[T_TOKEN],
         comment: str,
-        raw_line: str,
     ) -> Generator[T_OCR, None, None]:
         if not tokens:
             raise SyntaxError("Can't parse special command")
         head, *tail = tokens
         if comment == "":
-            yield {"op": Blank(), "comment": "", "raw": raw_line}
+            yield {"op": Blank(), "comment": ""}
         else:
-            yield {"op": Blank(), "comment": comment, "raw": raw_line}
+            yield {"op": Blank(), "comment": comment}
         if head in ["triangle", "regular"]:
             for name, exp in zip(tail, generate_points(head, len(tail))):
                 assert isinstance(name, str)
-                yield {"op": Point(name, [exp]), "comment": "", "raw": ""}
+                yield {"op": Point(name, [exp]), "comment": ""}
             return
         else:
             raise SyntaxError("Special command not recognized")
@@ -315,12 +313,10 @@ class Parser:
 
     def parse(self, line: str) -> Generator[T_OCR, None, None]:
         # escape sequence
-        raw_line = line
-        if raw_line.startswith("!"):
+        if line.startswith("!"):
             yield {
                 "op": DirectCommand(line[1:].strip()),
                 "comment": "",
-                "raw": raw_line,
             }
             return
 
@@ -330,11 +326,11 @@ class Parser:
             comment = ""
         tokens = self.tokenize(line)
         if not tokens:
-            yield {"op": Blank(), "comment": comment, "raw": raw_line}
+            yield {"op": Blank(), "comment": comment}
             return
         # special
         if tokens[0] == "~":
-            yield from self.parse_special(tokens[1:], comment, raw_line)
+            yield from self.parse_special(tokens[1:], comment)
             return
         # point
         try:
@@ -344,7 +340,6 @@ class Parser:
             yield {
                 "op": Point(name, exp, **options),
                 "comment": comment,
-                "raw": raw_line,
             }
             return
         except ValueError:
@@ -354,13 +349,13 @@ class Parser:
             idx = tokens.index("/")
             exp = self.parse_exp(tokens[:idx])
             options = self.parse_draw(tokens[idx + 1 :])
-            yield {"op": Draw(exp, **options), "comment": comment, "raw": raw_line}
+            yield {"op": Draw(exp, **options), "comment": comment}
             return
         except ValueError:
             pass
         # draw without options
         exp = self.parse_exp(tokens)
-        yield {"op": Draw(exp), "comment": comment, "raw": raw_line}
+        yield {"op": Draw(exp), "comment": comment}
         return
 
 
@@ -380,7 +375,12 @@ class Emitter:
         if self.preamble:
             print(GENERIC_PREAMBLE % self.size)
 
-        ocrs = [ocr for line in self.lines for ocr in self.parser.parse(line)]
+        original_raw = ""
+        ocrs = []
+        for line in self.lines:
+            original_raw += line
+            for ocr in self.parser.parse(line):
+                ocrs.append(ocr)
 
         for ocr in ocrs:
             print(
@@ -401,8 +401,7 @@ class Emitter:
             print(r"| TSQX: by CJ Quines and Evan Chen |")
             print(r"| https://github.com/vEnhance/tsqx |")
             print(r"+----------------------------------+")
-            for ocr in ocrs:
-                print(ocr["raw"].strip())
+            print(original_raw.strip())
             print("*/")
 
 
