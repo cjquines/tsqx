@@ -2,15 +2,22 @@
 
 [Asymptote](https://asymptote.sourceforge.io/) preprocessor
 for Euclidean geometry diagrams
-descended from the older [TSQ](https://github.com/vEnhance/dotfiles/blob/main/py-scripts/tsq.py).
+descended from the older [TSQ](https://github.com/vEnhance/dotfiles/blob/783dbb40628ba92d76ff51c228789b66522631d2/py-scripts/tsq.py).
 
 ## Installation
 
 `pip install tsqx`
 
+Or, Arch Linux users can use [AUR](https://aur.archlinux.org/packages/tsqx).
+
+## Syntax highlighting
+
+- [NeoVim TreeSitter syntax file](https://github.com/extouchtriangle/tree-sitter-tsqx)
+- [Older Vim syntax file](https://github.com/vEnhance/dotfiles/blob/main/vim/after/syntax/tsqx.vim) (using regular expressions)
+
 ## Documentation
 
-See [wiki](https://github.com/cjquines/tsqx/wiki/Documentation).
+See [Wiki](https://github.com/cjquines/tsqx/wiki/Documentation).
 
 ## Example code
 
