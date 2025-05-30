@@ -22,7 +22,7 @@ def generate_points(kind: str, n: int) -> list[str]:
 T_TOKEN = str | list[str] | list["T_TOKEN"]
 
 
-class T_OCR(TypedDict):  # op, comment, raw
+class T_OPSTRUCT(TypedDict):
     op: "Op"
     comment: str
 
@@ -110,14 +110,14 @@ class Point(Op):
         self,
         name: str,
         exp: T_TOKEN,
-        dot=True,
-        label="",
-        direction="",
+        dot: bool = True,
+        label: bool = True,
+        direction: str = "",
     ):
         self.name = name
         self.exp = exp
         self.dot = dot
-        self.label = name if label else None
+        self.label = name if label is True else None
         if self.label:
             self.label = self.label.replace("_prime", "'")
             self.label = self.label.replace("_asterisk", r"^{\ast}")
@@ -236,7 +236,7 @@ class Parser:
         self,
         tokens: list[T_TOKEN],
         comment: str,
-    ) -> Generator[T_OCR, None, None]:
+    ) -> Generator[T_OPSTRUCT, None, None]:
         if not tokens:
             raise SyntaxError("Can't parse special command")
         head, *tail = tokens
@@ -245,10 +245,10 @@ class Parser:
         if head in ["triangle", "regular"]:
             for name, exp in zip(tail, generate_points(head, len(tail))):
                 assert isinstance(name, str)
-                yield {"op": Point(name, [exp]), "comment": ""}
+                yield {"op": Point(name, [exp]), "comment": f"via ~{head}"}
             return
         else:
-            raise SyntaxError("Special command not recognized")
+            raise SyntaxError(f"Special command {head} not recognized")
 
     def parse_name(self, tokens: list[T_TOKEN]) -> tuple[str, dict[str, Any]]:
         if not tokens:
@@ -262,7 +262,11 @@ class Parser:
         else:
             opts = ""
         opts = self.alias_map.get(opts, opts)
-        options = {"dot": "d" in opts, "label": name if "l" in opts else None}
+        options = {
+            "dot": "d" in opts,
+            "label": "l" in opts,
+            "direction": f"dir({name})",  # default direction
+        }
 
         if rest:
             dirs, *rest = rest
@@ -277,8 +281,6 @@ class Parser:
                 options["direction"] = f"plain.{dirs}"
             else:
                 rest.append(dirs)
-        if "direction" not in options:
-            options["direction"] = f"dir({name})"
 
         if rest:
             raise SyntaxError("Can't parse point name")
@@ -309,7 +311,7 @@ class Parser:
 
         return {"fill": "+".join(fill), "outline": "+".join(outline)}
 
-    def parse(self, line: str) -> Generator[T_OCR, None, None]:
+    def parse(self, line: str) -> Generator[T_OPSTRUCT, None, None]:
         # escape sequence
         if line.startswith("!"):
             yield {
@@ -374,23 +376,23 @@ class Emitter:
             print(GENERIC_PREAMBLE % self.size)
 
         original_raw = ""
-        ocrs = []
+        op_structs = []
         for line in self.lines:
             original_raw += line
-            for ocr in self.parser.parse(line):
-                ocrs.append(ocr)
+            for op_struct in self.parser.parse(line):
+                op_structs.append(op_struct)
 
-        for ocr in ocrs:
+        for op_struct in op_structs:
             print(
                 (
-                    ocr["op"].emit()
-                    + (f" // {c}" if (c := ocr["comment"].rstrip()) else "")
+                    op_struct["op"].emit()
+                    + (f" // {c}" if (c := op_struct["comment"].rstrip()) else "")
                 ).strip()
             )
         print()
 
-        for ocr in ocrs:
-            if out := ocr["op"].post_emit():
+        for op_struct in op_structs:
+            if out := op_struct["op"].post_emit():
                 print(out)
 
         if not self.terse:
