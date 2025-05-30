@@ -24,7 +24,7 @@ path = "tsqx/__about__.py"
 packages = ["tsqx"]
 
 [project.scripts]
-tsqx = "tsqx.__main__:tsqx"
+tsqx = "tsqx.__main__:main"
 
 [tool.hatch.envs.dev]
 dependencies = [

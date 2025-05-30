@@ -1,10 +1,3 @@
-##########
-## TSQX ##
-##########
-
-# original TSQX by CJ Quines: https://github.com/cjquines/tsqx
-# original TSQ by evan chen
-
 import re
 import sys
 from io import TextIOWrapper
