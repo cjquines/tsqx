@@ -23,6 +23,9 @@ path = "tsqx/__about__.py"
 [tool.hatch.build.targets.wheel]
 packages = ["tsqx"]
 
+[tool.hatch.envs.default.scripts]
+tsqx = "python -m tsqx"
+
 [project.scripts]
 tsqx = "tsqx.__main__:main"
 
