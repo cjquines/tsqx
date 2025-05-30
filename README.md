@@ -1,10 +1,18 @@
 # TSQX
 
-[Asymptote](https://www.artofproblemsolving.com/wiki/index.php/Asymptote_(Vector_Graphics_Language)) preprocessor, based on [TSQ](https://github.com/vEnhance/dotfiles/blob/main/py-scripts/tsq.py).
+[Asymptote](<https://www.artofproblemsolving.com/wiki/index.php/Asymptote_(Vector_Graphics_Language)>) preprocessor
+for Euclidean geometry diagrams
+descended from the older [TSQ](https://github.com/vEnhance/dotfiles/blob/main/py-scripts/tsq.py).
 
-Run `python3 tsqx.py filename.txt > filename.asy`. See [wiki](https://github.com/cjquines/tsqx/wiki/Documentation) for more info.
+## Installation
 
-Sample code:
+`pip install tsqx`
+
+## Documentation
+
+See [wiki](https://github.com/cjquines/tsqx/wiki/Documentation).
+
+## Example code
 
 ```
 ~triangle A B C
