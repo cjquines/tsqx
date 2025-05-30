@@ -240,9 +240,7 @@ class Parser:
         if not tokens:
             raise SyntaxError("Can't parse special command")
         head, *tail = tokens
-        if comment == "":
-            yield {"op": Blank(), "comment": ""}
-        else:
+        if comment != "":
             yield {"op": Blank(), "comment": comment}
         if head in ["triangle", "regular"]:
             for name, exp in zip(tail, generate_points(head, len(tail))):
