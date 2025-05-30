@@ -366,11 +366,9 @@ class Emitter:
     def __init__(
         self,
         lines: TextIOWrapper | TextIO,
-        print_=print,
         **args: Any,
     ):
         self.lines = lines
-        self.print = print_
         self.preamble = args.get("preamble", False)
         self.size = args.get("size", "8cm")
         self.parser = Parser(**args)
@@ -378,38 +376,38 @@ class Emitter:
 
     def emit(self):
         if self.preamble:
-            self.print(GENERIC_PREAMBLE % self.size)
+            print(GENERIC_PREAMBLE % self.size)
 
         ocrs = [ocr for line in self.lines for ocr in self.parser.parse(line)]
 
         for ocr in ocrs:
-            self.print(
+            print(
                 ocr["op"].emit() + (f" //{c}" if (c := ocr["comment"].rstrip()) else "")
             )
-        self.print()
+        print()
 
         for ocr in ocrs:
             if out := ocr["op"].post_emit():
-                self.print(out)
+                print(out)
 
         if not self.terse:
-            self.print("")
-            self.print(
+            print("")
+            print(
                 r"/* -----------------------------------------------------------------+"
             )
-            self.print(
+            print(
                 r"|                 TSQX: by CJ Quines and Evan Chen                  |"
             )
-            self.print(
+            print(
                 r"| https://github.com/vEnhance/dotfiles/blob/main/py-scripts/tsqx.py |"
             )
-            self.print(
+            print(
                 r"+-------------------------------------------------------------------+"
             )
             for ocr in ocrs:
                 if x := ocr["raw"].strip():
-                    self.print(x)
-            self.print("*/")
+                    print(x)
+            print("*/")
 
 
 def main():
@@ -458,7 +456,7 @@ def main():
 
     args = argparser.parse_args()
     stream = open(args.fname, "r") if args.fname else sys.stdin
-    emitter = Emitter(stream, print, **vars(args))
+    emitter = Emitter(stream, **vars(args))
     emitter.emit()
 
 
