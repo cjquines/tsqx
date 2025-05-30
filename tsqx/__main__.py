@@ -392,18 +392,10 @@ class Emitter:
 
         if not self.terse:
             print("")
-            print(
-                r"/* -----------------------------------------------------------------+"
-            )
-            print(
-                r"|                 TSQX: by CJ Quines and Evan Chen                  |"
-            )
-            print(
-                r"| https://github.com/vEnhance/dotfiles/blob/main/py-scripts/tsqx.py |"
-            )
-            print(
-                r"+-------------------------------------------------------------------+"
-            )
+            print(r"/* --------------------------------+")
+            print(r"| TSQX: by CJ Quines and Evan Chen |")
+            print(r"| https://github.com/vEnhance/tsqx |")
+            print(r"+----------------------------------+")
             for ocr in ocrs:
                 if x := ocr["raw"].strip():
                     print(x)
