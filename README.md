@@ -1,6 +1,6 @@
 # TSQX
 
-[Asymptote](<https://www.artofproblemsolving.com/wiki/index.php/Asymptote_(Vector_Graphics_Language)>) preprocessor
+[Asymptote](https://asymptote.sourceforge.io/) preprocessor
 for Euclidean geometry diagrams
 descended from the older [TSQ](https://github.com/vEnhance/dotfiles/blob/main/py-scripts/tsq.py).
 
